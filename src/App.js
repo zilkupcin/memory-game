@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useState } from 'react';
 import logo from './logo.svg';
+import './reset.css';
 import './App.css';
 import { initializeApp } from "firebase/app";
 import { getFirestore,collection, addDoc, doc, query, where, getDocs, getDoc,setDoc, onSnapshot  } from "firebase/firestore";
@@ -8,7 +9,8 @@ import { ref, set } from "firebase/database";
 import { getAuth, signInAnonymously, onAuthStateChanged  } from "firebase/auth";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import Card from './Card';
-
+import Theme from './components/Theme';
+import GameSetup from './components/GameSetup';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -32,27 +34,132 @@ function App() {
 
   const gameId = "pgEvzAYb6maxhtrIw1GU";
   
-  const createGame = async () => {
-    const createGame = httpsCallable(functions, 'testFunc');
-    try {
-      const result = await createGame({maxPlayers: 4, size: 6})
-      // const data = await result.json();
-      console.log(result)
-      // console.log(data);
-    } catch(e) {
-      console.log(e)
-    }
+  const createGame = async (maxPlayers,size,gameType) => {
+    // CLOUD FUNCTION EXECUTION
+    // const createGame = httpsCallable(functions, 'testFunc');
     // try {
-    //   const docRef = await addDoc(collection(db, "game"), {
-    //     started: false,
-    //     finished: false,
-    //     endTime: new Date(),
-    //     grid: [1,2,3,4,5,6,7,8]
-    //   });
-    //   console.log("Document written with ID: ", docRef.id);
-    // } catch (e) {
-    //   console.error("Error adding document: ", e);
+    //   const result = await createGame({maxPlayers: 4, size: 6})
+    //   // const data = await result.json();
+    //   console.log(result)
+    //   // console.log(data);
+    // } catch(e) {
+    //   console.log(e)
     // }
+    const validSizes = [4,6];
+
+    if (typeof maxPlayers !== "number" || typeof size !== "number") {
+      console.log("Invalid data type");
+      return;
+    }
+
+    if (!validSizes.includes(size) || maxPlayers > 4 || maxPlayers < 1) {
+      console.log("Invalid game parameters");
+      return;
+    }
+
+    if (gameType !== 'icons' || gameType !== 'numbers') {
+      console.log("Invalid game tyoe");
+      return;
+    }
+
+    const gameGrid = generateEmptyGrid();
+
+    const gameRef = await addDoc(collection(db, "game"),  {
+      finished: false,
+      started: false,
+      host: auth.currentUser.uid,
+      maxPlayers,
+      grid: gameGrid,
+      players: [
+        {
+          playerId: auth.currentUser.uid,
+          score: 0,
+          playerPresent: true,
+        }
+      ],
+      createdAt: new Date()
+    });
+
+    const solutionRef = await addDoc(collection(db, "solution"),  {
+      game: gameRef.id,
+      grid: generateSolution()
+    });
+
+    function generateEmptyGrid() {
+      let grid = [];
+
+      for (let i = 0; i < size*size; i++) {
+        grid.push(-1);
+      }
+
+      return grid;
+    }
+
+    function generateSolution() {
+      // Unique icons
+      const iconSet = ['football-ball','mountain','tree','wind','tractor','space-shuttle','meteor',
+        'rocket','bomb','cloud','feather','bone','fish','ice-cream','pizza-slice','stroopwafel','plane','wine-glass-alt'];
+
+      // Unique number set equal to the number of grid's columns
+      let numberSet = [];
+
+      // Make a copy of the empty grid
+      let solution = [...gameGrid];
+
+      for (let i = 0; i < (size * size) / 2; i++) {
+
+        // Unique element of the solution array
+        let uniqueElement;
+
+        // Select a random element depending on the type of the game
+        if (gameType === 'numbers') {
+          // Generate a unique random number
+          uniqueElement = generateNumber(numberSet);
+          // Keep track of the number so we know only add unique ones
+          numberSet.push(uniqueElement);
+        } else if (gameType === 'icons') {
+          // Select a random icon from the iconSet
+          uniqueElement = selectIcon(iconSet);
+        }
+
+        // Put the generated element in 2 random places of the solution array
+        for (let b = 0; b < 2; b++) {
+          // Store the indexes of all remaining empty elements
+          const emptyGridElements = [];
+
+          // Check which solution elements are still empty
+          solution.forEach((item,index) => {
+            if (item === -1) {
+              emptyGridElements.push(index);
+            }
+          })
+
+          const randIndex = Math.floor(Math.random() * emptyGridElements.length);
+
+          solution[emptyGridElements[randIndex]] = uniqueElement;
+        }
+      }
+
+      return solution;
+    }
+
+    function generateNumber(numbers) {
+      const newNumber = Math.floor(Math.random() * 100);
+      if (numbers.includes(newNumber)) {
+        return generateNumber(numbers);
+      } else {
+        return newNumber;
+      }
+    }
+
+    function selectIcon(iconSet) {
+      const randomIndex = Math.floor(Math.random() * iconSet.length);
+      const randomIcon = iconSet[randomIndex];
+      iconSet.splice(randomIndex,1);
+      return randomIcon;
+    }
+
+    return gameRef.id;
   }
 
   const joinGame = async () => {
@@ -129,24 +236,28 @@ function App() {
 
       if (!activePlayer) return;
 
-        const playerIndex = gameDoc.get("players").indexOf(activePlayer)
+      const playerIndex = gameDoc.get("players").indexOf(activePlayer)
 
-        const activeGameRef = doc(db, 'game', gameDoc.id);
+      const activeGameRef = doc(db, 'game', gameDoc.id);
 
-        const changedGameData = {};
+      const changedGameData = {};
 
-        changedGameData.players = gameDoc.get("players");
-        
-        // If the game has started, just change the active state, else remove the player
-        if (gameDoc.get("started")) {
-          changedGameData.players[playerIndex].active = false;
+      changedGameData.players = gameDoc.get("players");
+      
+      // If the game has started, just change the active state, else remove the player
+      if (gameDoc.get("started")) {
+        changedGameData.players[playerIndex].active = false;
+      } else {
+        if (auth.currentUser.uid === gameDoc.host) {
+          // TODO: If the host leaves before the game is started, delete the game
         } else {
           changedGameData.players.splice(playerIndex,1);
         }
+      }
 
-        updatedGames.push(gameDoc.id);
+      updatedGames.push(gameDoc.id);
 
-        await setDoc(activeGameRef, changedGameData, { merge: true });
+      await setDoc(activeGameRef, changedGameData, { merge: true });
     });
 
     if (updatedGames.length > 0) {
@@ -162,6 +273,11 @@ function App() {
 
     if (!currentGameSnap.exists()) {
       console.log("Game with this ID doesn't exist");
+      return;
+    }
+
+    if (!currentGameSnap.get("started")) {
+      console.log("The game has not started yet");
       return;
     }
 
@@ -186,6 +302,7 @@ function App() {
     const currentTurn = currentGameSnap.get("currentTurn");
     const players = currentGameSnap.get("players");
     const grid = currentGameSnap.get("grid");
+    let finished = currentGameSnap.get("finished");
 
     if (currentTurn.selection.length < 2) {
 
@@ -242,8 +359,12 @@ function App() {
       currentTurn.selection.push(index);
     }
 
+    if (!grid.find(gridElm => gridElm === -1)) {
+      finished = true;
+    }
+
     const currentGameRef = doc(db, 'game', gameId);
-    await setDoc(currentGameRef, {currentTurn, players, grid}, { merge: true });
+    await setDoc(currentGameRef, {currentTurn, players, grid, finished}, { merge: true });
 
     return number;
   }
@@ -305,7 +426,7 @@ function App() {
       newSelection = [];
     } 
 
-    newSelection.push({index, number: res});
+    newSelection.push({index, value: res});
 
     setSelection(newSelection);
   }
@@ -316,38 +437,83 @@ function App() {
     })
   } 
 
+  const startGame = async () => {
+    const currentGameSnap = await getDoc(doc(db, 'game', gameId));
+
+    if (!currentGameSnap.exists()) {
+      console.log("This game doesn't exist");
+      return;
+    }
+
+    if (currentGameSnap.get("host") !== auth.currentUser.uid) {
+      console.log("You are not the host of this game");
+      return;
+    }
+
+    if (currentGameSnap.get("started")) {
+      console.log("This game has already started");
+      return;
+    }
+
+    if (currentGameSnap.get("maxPlayers") !== currentGameSnap.get("players").length) {
+      console.log("Not enough players to start the game");
+      return;
+    }
+
+    const currentTurn = {
+      player: currentGameSnap.get("players")[0].id,
+      selection: []
+    }
+
+    const currentGameRef = doc(db, 'game', gameId);
+    await setDoc(currentGameRef, {started: true, currentTurn}, { merge: true });
+  }
+
+  const WaitingRoom = () => {
+    return (
+      <div>
+        <p>{game.players.length === game.maxPlayers ? 'Waiting for the host to start the game' : 'Waiting for more players to join'}</p>
+        <span>{`${game.players.length}/${game.maxPlayers}`}</span>
+        {game.players.map((player, index) => {
+          return (
+            <div>{`Player ${index +1}`}</div>
+          )
+        })}
+      </div>
+    )
+  }
+
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <button onClick={createGame}>Add new game</button>
+      <Theme>
+        <GameSetup></GameSetup>
+      <div>
+        <button onClick={() => createGame(4,6)}>Add new game</button>
         <button onClick={joinGame}>Join game</button>
         <button onClick={leaveGame}>Leave game</button>
         <button onClick={guess}>Guess</button>
         <button onClick={listenToGameChanges}>Listen to game changes</button>
-      </header>
-      <div>
-        {game && game.maxPlayers}
       </div>
-
+      {game && !game.started && WaitingRoom()}
       <div className="game-grid">
-        {game && game.grid.map((elm, index) => {
+        {game && game.started && !game.finished && game.grid.map((elm, index) => {
           const foundSelection = selectionIncludes(index);
-          console.log(foundSelection)
           return (<Card 
             selected={foundSelection ? true : false} 
             onBubbleSelect={bubbleSelectHandler} 
             index={index} 
-            number={foundSelection ? foundSelection.number : elm}>
+            value={foundSelection ? foundSelection.value : elm}>
             </Card>)
         })}
       </div>
-      {game && game.players.map((player, index) => {
+      {game && game.started && !game.finished && game.players.map((player, index) => {
           return (
             <div>{`Player ${index +1}: ${player.score}`}</div>
           )
         })}
-    </div>
+
+        {game && !game.started && game.host === auth.currentUser.uid && game.maxPlayers === game.players.length && <button onClick={startGame}>Start the game</button>}
+      </Theme>
   );
 }
 
