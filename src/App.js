@@ -8,29 +8,23 @@ import { getFirestore,collection, addDoc, doc, query, where, getDocs, getDoc,set
 import { ref, set } from "firebase/database";
 import { getAuth, signInAnonymously, onAuthStateChanged  } from "firebase/auth";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { app, db, auth } from './firebase/firebase';
 import Card from './Card';
 import Theme from './components/Theme';
 import GameSetup from './components/GameSetup';
-
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore();
-const auth = getAuth();
-const functions = getFunctions(app);
+import Game from './components/Game';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate
+} from "react-router-dom";
 
 function App() {
 
   const [game, setGame] = useState();
   const [selection, setSelection] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const gameId = "pgEvzAYb6maxhtrIw1GU";
   
@@ -75,6 +69,7 @@ function App() {
           playerId: auth.currentUser.uid,
           score: 0,
           playerPresent: true,
+          isReady: false
         }
       ],
       createdAt: new Date()
@@ -204,7 +199,8 @@ function App() {
         {
           id: auth.currentUser.uid,
           score: 0,
-          active: true
+          active: true,
+          isReady: false
         });
 
       const newGameRef = doc(db, 'game', gameId);
@@ -378,6 +374,7 @@ function App() {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       const uid = user.uid;
+      setIsLoading(false);
     } else {
       console.log("logged out")
     }
@@ -483,10 +480,27 @@ function App() {
     )
   }
 
+  if (isLoading) return (<div>Loading</div>)
+
 
   return (
       <Theme>
-        <GameSetup></GameSetup>
+        <Router>
+          <Routes>
+            <Route path="/" element={
+               <GameSetup></GameSetup>
+            }>
+            </Route>
+            <Route path="/game/:gameId" exact element={
+              <Game></Game>
+            }>
+            </Route>
+            <Route
+              path="*"
+              element={<Navigate to="/" />}
+            />
+          </Routes>
+        </Router>
       <div>
         <button onClick={() => createGame(4,6)}>Add new game</button>
         <button onClick={joinGame}>Join game</button>
