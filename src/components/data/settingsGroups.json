@@ -1,0 +1,52 @@
+[
+    {
+        "type": "gameType",
+        "label": "Select Theme",
+        "options": [
+            {
+                "value":"numbers",
+                "label": "Numbers"
+            },
+            {
+                "value":"icons",
+                "label": "Icons"
+            }
+        ]
+    },
+    {
+        "type": "maxPlayers",
+        "label": "Number of Players",
+        "options": [
+            {
+                "value": 1,
+                "label": "1"
+            },
+            {
+                "value": 2,
+                "label": "2"
+            },
+            {
+                "value": 3,
+                "label": "3"
+            },
+            {
+                "value":4,
+                "label": "4"
+            }
+        ]
+    },
+    {
+        "type": "size",
+        "label": "Grid Size",
+        "options": [
+            {
+                "value": 4,
+                "label": "4x4"
+            },
+            {
+                "value": 6,
+                "label": "6x6"
+            }
+        ]
+    }
+]
