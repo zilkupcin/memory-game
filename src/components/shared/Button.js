@@ -18,6 +18,14 @@ const StyledButton = styled.button.attrs(props => ({
     &:hover {
         background-color: ${({type,theme}) => getHoverBackgroundColor(type,theme)}
     }
+
+    &:disabled {
+        opacity: 0.7;
+
+        &:hover {
+            background-color: ${({type, isActive, theme}) => getBackgroundColor(type, isActive, theme)};
+        }
+    }
 `;
 
 const getBackgroundColor = (type, isActive, theme) => {
@@ -47,14 +55,15 @@ const getHoverBackgroundColor = (type,theme) => {
     }
 }
 
-const Button = ({type, width, margin, onClick, value, ...props}) => {
+const Spinner = () => {
+    return (<i className="fas fa-spinner fa-spin"></i>); 
+}
 
-    const handleClick = () => {
-        onClick(value);
-    }
-
+const Button = ({type, width, margin, disabled, onClick, isLoading, ...props}) => {
     return(
-        <StyledButton onClick={handleClick} type={type} width={width} margin={margin}>{props.children}</StyledButton>
+        <StyledButton disabled={isLoading || disabled} onClick={onClick} isLoading={isLoading} type={type} width={width} margin={margin}>
+            {isLoading ? <Spinner></Spinner> : props.children}
+        </StyledButton>
     );
 }
 
