@@ -95,6 +95,7 @@ const GameSetup = () => {
           players: [
             {
               id: auth.currentUser.uid,
+              name: "Player 1",
               score: 0,
               active: true,
               isReady: false
