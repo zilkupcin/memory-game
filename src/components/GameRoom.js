@@ -32,10 +32,11 @@ const GridItem = styled.div`
         content: '';
         display:block;
         padding-bottom: 100%;
+        font-size: 32px;
     }
 
     i {
-        font-size: 24px;
+        font-size: 32px;
         color: white;
     }
 `;
