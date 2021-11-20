@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Navigate } from "react-router-dom";
 import styled from 'styled-components'
 import Header from './Header';
 import WaitingRoom from './WaitingRoom';
 import { db, auth } from '../firebase/firebase';
-import { getFirestore,collection, addDoc, doc, query, where, getDocs, getDoc,setDoc, onSnapshot  } from "firebase/firestore";
+import { collection, doc, query, where, getDocs, getDoc,setDoc, onSnapshot  } from "firebase/firestore";
 import GameRoom from './GameRoom';
 import ResultsModal from './ResultsModal';
+import { restartGame } from '../firebase/firebaseCloud';
 
 const Container = styled.div`
     display: flex;
@@ -35,7 +36,7 @@ const Game = () => {
         return () => {
             unsubscribe();
         }
-    },[]);
+    },[gameId]);
 
     useEffect(() => {
         let removeSelectionTimeout;
@@ -60,6 +61,12 @@ const Game = () => {
         console.log("safe to join")
         joinGame();
         
+    },[game])
+
+    useEffect(() => {
+      if (game && game.nextGame) {
+        navigate(`/game/${game.nextGame}`);
+      }
     },[game])
 
     if (!game) {
@@ -92,8 +99,9 @@ const Game = () => {
 
             // Check if there are any players that aren't ready
             const notReadyPlayers = players.find(player => player.isReady === false);
+
             // If there aren't any - start the game
-            if (!notReadyPlayers) {
+            if (!notReadyPlayers && players.length === gameSnap.get("maxPlayers")) {
                 started = true;
             }
 
@@ -270,6 +278,7 @@ const Game = () => {
           players.push(
             {
               id: auth.currentUser.uid,
+              name: `Player ${players.length + 1}`,
               score: 0,
               active: true,
               isReady: false
@@ -290,13 +299,25 @@ const Game = () => {
         }
       }
 
+    const handleRestart = async () => {
+      try {
+        await restartGame(gameId);
+      } catch(e) {
+        console.log(e);
+      }
+    }
+
+    const handleNewGame = async () => {
+
+    }
+
     return(
         <Container>
             <Header isHost ={game.host === auth.currentUser.uid}></Header>
             {!currentPlayer && <div>Joining the game</div>}
             {currentPlayer && !game.started && <WaitingRoom onToggleReady={handleReadyClick} players={game.players} currentPlayer={currentPlayer}></WaitingRoom>}
             {currentPlayer && game.started && <GameRoom onGuess={handleGuess} game={game} selection={selection}></GameRoom> }
-            <ResultsModal game={game}></ResultsModal>
+            {game.finished && <ResultsModal onRestart={handleRestart} onNewGame={handleNewGame} game={game}></ResultsModal>}
         </Container>
     )
 }
