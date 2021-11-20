@@ -491,7 +491,7 @@ function App() {
                <GameSetup></GameSetup>
             }>
             </Route>
-            <Route path="/game/:gameId" exact element={
+            <Route path="/game/:gameId" element={
               <Game></Game>
             }>
             </Route>
