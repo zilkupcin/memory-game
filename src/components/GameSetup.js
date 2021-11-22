@@ -191,13 +191,17 @@ const GameSetup = () => {
       }
 
     const handleCreateGame = async () => {
-        setIsLoading(true);
+      if (!gameSettings.maxPlayers || !gameSettings.size || !gameSettings.gameType) {
+        return;
+      }
 
-        const newGameId = await createGame(gameSettings.maxPlayers, gameSettings.size, gameSettings.gameType); 
+      setIsLoading(true);
 
-        if (newGameId) {
-            navigate('/game/' + newGameId);
-        }
+      const newGameId = await createGame(gameSettings.maxPlayers, gameSettings.size, gameSettings.gameType); 
+
+      if (newGameId) {
+          navigate('/game/' + newGameId);
+      }
     }
 
     return (
