@@ -24,13 +24,13 @@ const ButtonGroup = styled.div`
 `
 
 
-const Header = ({isHost}) => {
+const Header = ({isHost, onNewGame, onRestart}) => {
     return(
     <StyledHeader>
         <Logo>memory</Logo>
         <ButtonGroup>
-            {isHost && <Button type="primary">Restart</Button>}
-            <Button type="secondary">New Game</Button>
+            {isHost && <Button type="primary" onClick={onRestart}>Restart</Button>}
+            <Button onClick={onNewGame} type="secondary">New Game</Button>
         </ButtonGroup>
     </StyledHeader>)
 }
