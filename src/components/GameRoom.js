@@ -27,6 +27,7 @@ const GridItem = styled.div`
     color: white;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
+    font-size: 28px;
 
     &::after {
         content: '';
@@ -114,8 +115,6 @@ const GameRoom = ({game, selection, onGuess}) => {
                     return (
                     <GridItem selected={foundSelection ? true : false} revealed={gridItem !== -1} onClick={(() => onGuess(index))}>
                         {getItemContent(gridItem, foundSelection)}
-                        {/* {(game.gameType === 'numbers' && gridItem !== -1) ? gridItem : '' }
-                        {(game.gameType === 'icons' && gridItem !== -1) ? <span className="fas fa-spinner fa-spin"></span> : ''} */}
                     </GridItem>)
                 })}
             </Grid>
