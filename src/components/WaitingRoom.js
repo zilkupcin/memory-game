@@ -35,9 +35,24 @@ const PlayerState = styled.span`
     font-size: 20px;
 `;
 
-const WaitingRoom = ({players, onToggleReady, currentPlayer}) => {
+const Title = styled.h2`
+    margin-bottom: 12px;
+    color: ${props => props.theme.colors.dark};
+    text-align: center;
+`;
+
+const Subtitle = styled.p`
+    font-size: 16px;
+    margin-bottom: 24px;
+    color: ${props => props.theme.colors.gothic};
+    text-align: center;
+`;
+
+const WaitingRoom = ({players, onToggleReady, onLinkCopy, currentPlayer, maxPlayers}) => {
     return (
         <Container>
+            <Title>{`${players.length}/${maxPlayers} players are here`}</Title>
+            <Subtitle>Waiting for other players to join</Subtitle>
             <PlayerList>
                 {players.map((player,index) => {
                     return (
@@ -48,7 +63,8 @@ const WaitingRoom = ({players, onToggleReady, currentPlayer}) => {
                     )
                 })}
             </PlayerList>
-            <Button onClick={onToggleReady} type="primary">{currentPlayer.isReady ? "I'm not ready" : "I'm ready!"}</Button>
+            <Button width="100%" onClick={onToggleReady} margin="0 0 8px 0" type="primary">{currentPlayer.isReady ? "I'm not ready" : "I'm ready!"}</Button>
+            <Button width="100%" onClick={onLinkCopy} type="secondary">Copy invite link</Button>
         </Container>
     )
 }
