@@ -11,13 +11,7 @@ const restartGame = async (gameId) => {
         console.log("You are not the host of this game");
         return;
     }
-
-    if (!gameSnap.get("finished") || !gameSnap.get("started")) {
-        console.log("Please wait for the game to finish")
-    }
-
     const currentGameRef = doc(db, 'game', gameId);
-
 
     const size = gameSnap.get("grid").length;
     const gameType = gameSnap.get("gameType");
@@ -31,7 +25,7 @@ const restartGame = async (gameId) => {
         grid: generateSolution(Math.sqrt(size),gameType, gameGrid)
     });
 
-    await setDoc(currentGameRef, {nextGame: newGameRef.id}, { merge: true });
+    await setDoc(currentGameRef, {nextGame: newGameRef.id, finished: true}, { merge: true });
 }
 
 function generateEmptyGrid(size) {
