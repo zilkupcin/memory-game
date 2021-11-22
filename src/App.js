@@ -19,6 +19,7 @@ import {
   Routes,
   Navigate
 } from "react-router-dom";
+import Messages from './components/Messages';
 
 function App() {
 
@@ -501,15 +502,16 @@ function App() {
             />
           </Routes>
         </Router>
-      <div>
+        <Messages></Messages>
+      {/* <div>
         <button onClick={() => createGame(4,6)}>Add new game</button>
         <button onClick={joinGame}>Join game</button>
         <button onClick={leaveGame}>Leave game</button>
         <button onClick={guess}>Guess</button>
         <button onClick={listenToGameChanges}>Listen to game changes</button>
       </div>
-      {game && !game.started && WaitingRoom()}
-      <div className="game-grid">
+      {game && !game.started && WaitingRoom()} */}
+      {/* <div className="game-grid">
         {game && game.started && !game.finished && game.grid.map((elm, index) => {
           const foundSelection = selectionIncludes(index);
           return (<Card 
@@ -526,7 +528,7 @@ function App() {
           )
         })}
 
-        {game && !game.started && game.host === auth.currentUser.uid && game.maxPlayers === game.players.length && <button onClick={startGame}>Start the game</button>}
+        {game && !game.started && game.host === auth.currentUser.uid && game.maxPlayers === game.players.length && <button onClick={startGame}>Start the game</button>} */}
       </Theme>
   );
 }
