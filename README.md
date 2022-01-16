@@ -1,70 +1,57 @@
-# Getting Started with Create React App
+# About
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a multiplayer memory game built with React which uses the Firebase Firestore Database to bring data to the front end in real time. It also uses Firebase Cloud Functions to separate server-side logic from front end code. 
 
-## Available Scripts
+ :warning: **Cloud functions have a cold start delay**, therefore if the app hasn't been used by anyone in a while, there will be a 5-10s delay for each cloud function to run folr the 1st time. This affects: new game creation, setting the ready state, taking a turn, restarting the game.
 
-In the project directory, you can run:
+[Try a live demo here](https://memory-game.zildev.com/).
 
-### `npm start`
+# Setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+To set this up locally, you should first set up a new Firebase app [here](https://firebase.google.com/).
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Once you've set up the app, set up **Firestore Database** and **Functions** in your dashboard.
 
-### `npm test`
+Clone these repositories:
+```
+https://github.com/zilkupcin/memory-game
+https://github.com/zilkupcin/memory-game-cloud
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Install the Firebase CLI from [here](https://firebase.google.com/docs/cli)
 
-### `npm run build`
+In the **memory-game** project repository, create an .env file and set the values to these environment variables with your app's credentials.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+REACT_APP_FIREBASE_API_KEY=
+REACT_APP_FIREBASE_AUTH_DOMAIN=
+REACT_APP_FIREBASE_PROJECT_ID=
+REACT_APP_FIREBASE_STORAGE_BUCKET=
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=
+REACT_APP_FIREBASE_APP_ID=
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Set the REACT_APP_DEV_MODE variable to true
+```
+REACT_APP_DEV_MODE=true
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+In the **memory-game-cloud** repository, run 
+```
+npm install
+firebase-login
+firebase emulators:start
+```
 
-### `npm run eject`
+In the **memory-game** repository, run
+```
+npm start
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+This will open up a browser window with the game which will communicate with the local version of cloud functions.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
