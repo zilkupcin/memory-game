@@ -6,12 +6,12 @@ import { auth } from "../firebase/firebase";
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(${(props) => Math.sqrt(props.size)}, 1fr);
-  column-gap: 8px;
-  row-gap: 8px;
+  column-gap: 18px;
+  row-gap: 18px;
   margin-bottom: 32px;
 
   @media only screen and (min-width: 768px) {
-    margin: 32px auto 64px auto;
+    margin: 76px auto 88px auto;
     width: 100%;
     max-width: 80%;
   }
@@ -36,12 +36,26 @@ const Players = styled.div`
   row-gap: 24px;
 
   @media only screen and (min-width: 768px) {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(${(props) => props.playerCount}, 1fr);
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  @media only screen and (min-width: 1024px) {
+    grid-template-columns: repeat(
+      ${(props) => (props.playerCount > 2 ? 2 : props.playerCount)},
+      1fr
+    );
+    width: 480px;
   }
 
   @media only screen and (min-width: 1280px) {
     width: 100%;
-    max-width: 1024px;
+    grid-template-columns: repeat(
+      ${(props) => (props.playerCount === 1 ? 2 : props.playerCount)},
+      1fr
+    );
+    max-width: ${(props) => (props.playerCount > 2 ? 1024 : 600)}px;
     margin: 0 auto;
   }
 
@@ -155,7 +169,7 @@ const GameRoom = ({ game, selection, onGuess }) => {
           );
         })}
       </Grid>
-      <Players>
+      <Players playerCount={game.players.length}>
         {game.players.map((player, index) => {
           return (
             <Player
