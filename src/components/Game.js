@@ -9,6 +9,7 @@ import GameRoom from "./GameRoom";
 import ResultsModal from "./ResultsModal";
 import { runCloud } from "../firebase/firebaseCloud";
 import { MessagesContext } from "./MessagesProvider";
+import Loading from "./shared/Loading";
 
 const Container = styled.div`
   display: flex;
@@ -151,6 +152,10 @@ const Game = () => {
     navigator.clipboard.writeText(window.location.href);
     addMessage("Link copied!", "notice");
   };
+
+  if (!currentPlayer) {
+    return <Loading readyForTransition={true}></Loading>;
+  }
 
   return (
     <Container>
