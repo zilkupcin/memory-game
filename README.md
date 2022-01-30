@@ -2,7 +2,7 @@
 
 This is a multiplayer memory game built with React which uses the Firebase Firestore Database to bring data to the front end in real time. It also uses Firebase Cloud Functions to separate server-side logic from front end code. 
 
- :warning: **Cloud functions have a cold start delay**, therefore if the app hasn't been used by anyone in a while, there will be a 5-10s delay for each cloud function to run folr the 1st time. This affects: new game creation, setting the ready state, taking a turn, restarting the game.
+ :warning: **Cloud functions have a cold start delay**, therefore if the app hasn't been used by anyone in a while, there will be a 5-10s delay for each cloud function to run for the 1st time. This affects: new game creation, setting the ready state, taking a turn, restarting the game.
 
 [Try a live demo here](https://memory-game.zildev.com/).
 
